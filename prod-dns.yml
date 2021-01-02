@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Provisions DNS infrastructure for the Production Environment'
+
+Parameters:
+  HostedZoneDomain:
+    Type: String
+    Default: 'macklin.xyz'
+  DevHostedZoneDomain:
+    Type: String
+    Default: 'dev.macklin.xyz'
+  DevNameServer1:
+    Type: String
+  DevNameServer2:
+    Type: String
+  DevNameServer3:
+    Type: String
+  DevNameServer4:
+    Type: String
+
+Resources:
+  HostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: !Ref HostedZoneDomain
+
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties: 
+      DomainName: !Ref HostedZoneDomain
+      DomainValidationOptions:
+        - DomainName: !Ref HostedZoneDomain
+          HostedZoneId: !Ref HostedZone
+      ValidationMethod: DNS
+      Tags:
+        - Key: Name
+          Value: certificate
+
+  DevNameServers:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId : !Ref HostedZone
+      Name: !Ref DevHostedZoneDomain
+      ResourceRecords:
+      - !Ref DevNameServer1
+      - !Ref DevNameServer2
+      - !Ref DevNameServer3
+      - !Ref DevNameServer4
+      TTL: '300'
+      Type: NS
